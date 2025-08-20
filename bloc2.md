@@ -1,6 +1,6 @@
 ---
 title: "Titre RNCP - RNCP39583BC04"
-subtitle: "Bloc 2 : Maintenir l'application logicielle en condition opérationnelle"
+subtitle: "Bloc 2 : Concevoir et développer des applications logicielles"
 author: "Maxence Pille - Ynov 2025"
 ---
 
