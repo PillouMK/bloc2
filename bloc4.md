@@ -1,6 +1,6 @@
 ---
 title: "Titre RNCP - RNCP39583BC04"
-subtitle: "Bloc 2 : Concevoir et développer des applications logicielles"
+subtitle: "Bloc 4 :  MAINTENIR L’APPLICATION LOGICIELLE EN CONDITION OPERATIONNELLE"
 author: "Maxence Pille - Ynov 2025"
 ---
 
@@ -74,7 +74,49 @@ Ces sécurités mises en places garantissent que le projet ne pourra être dépl
 
 ## 2.2 Système de supervision - C4.1.2
 
-todo
+Railway propose des outils directement intégrés pour permettre une surveillance de l'état de santé de l'application, nous utilisons certains de ces outils pour avoir en permanence une idée du statut du logiciel
+
+### Sondes mises en place
+
+#### API Rest
+
+- Logs de l'application
+- Metrics en direct : CPU Usage, Memory Usage, Network egress
+
+![Logs metrics](images/logs_metrics.png)
+
+Ces informations permettent de connaître l'état du serveur, afin de savoir s'il tourne et s'il est dans un état critique ou non
+
+- Logs des requêtes HTTPS à l'API
+
+![logs http](images/https_logs.png)
+
+Permet de voir si les requêtes faites à l'API aboutissent bien ainsi que leur temps de réponse
+
+#### Base de données
+
+Comme c'est également Railway qui héberge la base de données, les mêmes sondes ont été mises en place
+
+![alt text](images/BDD_metrics.png)
+
+#### Bot Discord
+
+Le bot possède les mêmes metrics que montré précédement, cependant il n'a pas de logs HTTPS
+
+#### Critères de performances
+
+Disponibilités des services > 99%, donc accessibles en continu
+
+API :
+
+- Temps de réponse rapide : < 200ms en moyenne
+
+Bot Discord :
+
+- Temps de réponse rapide : < 200ms sur les commandes les plus utilisés
+
+Cependant Railway ne permet pas de configurer des seuils d'alertes pour automatiser le signalement, cette supervison est donc bien structuré mais reste manuel et nécessite d'être rigoureux.
+Mais si l'application venait a crash, Railway s'occupe de lui-même de la remettre en ligne
 
 # 3. Traitement des anomalies
 
@@ -95,6 +137,8 @@ Le premier processus s'appuie sur les logs de l'application. Avec Railway, nous 
 - Logs de l'application, pour surveiller les potentielles erreurs, il est possible de filtrer ces logs afin de directement chercher les erreurs, par exemple avec le mot-clé "error"
 
 ![alt text](images/app_logs.png)
+
+Cette collecte n'est pas automatisé, mais elle est structuré de manière à être efficace si elle est effectuée de manière régulière et rigoureuse.
 
 2. Signalement des utilisateurs
 
@@ -117,7 +161,7 @@ Lorsqu'une anomalie est détectée, une issue est créé sur Github et un dével
 #### Exemple de la consignation d'une anomalie rencontrée au cours du projet :
 
 - Détectée par un utilisateur, celui-ci va créer un ticket dans le channel prévu à cet effet, en utilisant le template :
-  ![bug ticket](images/bug_plan.png)
+  ![alt text](images/ticket_thib.png)
 
 - Le développeur va, à partir du signalement, créer une issue sur le repo Github :
   ![bug ticket](images/bug_ticket.png)
@@ -191,3 +235,37 @@ Ce système nécessite d'être rigoureux sur les commits du projet. Ou bien de r
 ![API journal de version](images/journal_de_version.png)
 
 ## 4.3 Collaboration avec le support client - C4.3.3
+
+Pour l'exemple de collaboration avec le support client, nous pouvons reprendre l'anomalie de la compétence C4.2.2 où c'est le support client qui a remonté l'anomalie en transmettant le ticket reçu dans le canal de discussion prévu à cet effet.
+
+### Contexte retour client
+
+Un ticket est reçu par le support client suite à un bug trouvé par un utilisateur
+![alt text](images/ticket_thib.png)
+
+Le support va alors créer une issue sur Github à partir de ce ticket, pour le développeur
+
+![alt text](images/bug_ticket.PNG)
+
+### Analyse du ticket par le développeur
+
+Le bug est analysé afin de trouver la source du problème : Un lien du message généré par le bot ne renvoit vers aucun message<br>
+Il est trouvé que la façons dont est enregistré le lien du message a été mal conçu sur la commande `/edit_race`
+![alt text](images/issue_details.png)
+
+### Résolution technique
+
+Le développeur indique dans l'issue Github la solution technique à apporter pour résoudre l'anomalie
+
+![alt text](images/solution_ticket.png)
+
+### Les parties prenante
+
+- L'utilisateur
+  - Signale un bug qu'il a rencontré lors de l'utilisation du Bot Discord, pour cela il créé un ticket.
+- Le support client
+  - Transmet le ticket créé par l'utilisateur au développeur en créant une issue Github.
+  - Indique à l'utilisateur que le bug est pris en charge/a été résolu.
+- Le développeur
+  - Analyse le bug et le corrige, déploie le correctif.
+  - Indique au support client lorsque un correctif est déployé.
