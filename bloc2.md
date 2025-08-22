@@ -16,11 +16,27 @@ L’application est séparée en deux entités :
 - **Front-end** : un **Bot Discord** permettant aux équipes de saisir et consulter les résultats directement depuis leur serveur Discord.
 - **Back-end** : une **API REST** connectée à une base de données **PostgreSQL**, chargée de centraliser, traiter et fournir les données.
 
-## 1.2 Objectifs principaux
+## 1.2 Fonctionnalités de l'application
 
-- Créer, gérer et conserver un **historique des matchs** pour une équipe.
-- Calculer et afficher des **statistiques détaillées** sur les joueurs, les équipes et les différentes courses existantes.
-- Assurer la **sauvegarde des temps réalisés** en mode _Contre-la-montre_ et générer automatiquement les **classements associés** pour une équipe.
+- **Gestion des matchs**
+  - Calcul en temps réel d'un match.
+  - Sauvegarde des résulats des joueurs.
+  - Sauvegarde des résultats des courses.
+  - Générer les tableaux de résultats.
+  - Gérer l'historique des matchs.
+- **Gestion des disponibilités des joueurs**
+  - Permettre aux joueurs d'ajouter leurs disponbilités (disponible, peut-être, pas disponible ou remplaçant).
+  - Afficher les disponibilités des équipes.
+- **Gestion du contre-la-montre**
+  - Ajouter ou modifier un temps de contre-la-montre.
+  - Afficher classement d'une équipe pour une course.
+  - Gérer les modes avec ou sans utilisations des objets.
+- **Statistiques**
+  - Afficher les statistiques des courses pour une équipe
+  - Afficher les statistiques générales d'un joueur ou d'une équipe
+- **Général**
+  - Afficher code-ami Switch d'un joueur
+  - Enregister son code-ami
 
 # 2. outillage & organisation du travail
 
@@ -53,14 +69,15 @@ Les variables d'environnements sont également gérées directement sur Railway 
 
 #### Qualité du code :
 
-- Vérification ESLint.
-- Vérification des dépendances inutilisées via Depcheck.
-- Tests unitaires avec Jest.
+- Vérification **ESLint**.
+- Vérification des dépendances inutilisées via **Depcheck**.
+- Vérifification des vulnérabilités des dépendances **(audit)**
+- Tests unitaires avec **Jest**.
 
-#### Performance
+#### Performances
 
 - Majorité des requêtes sous les 200ms de temps de réponse
-- Requêtes SQL optimisées avec PrismaORM
+- Requêtes SQL optimisées et sécurisées avec PrismaORM
 
 Railway met à disposition des outils permettant de suivre les performances de l'applications via des logs, graphiques, metrics, etc :
 
@@ -86,12 +103,12 @@ Pour prendre l'exemple de **l'API Rest**, il existe trois environnements :
 La pipeline va executer les tâches suivantes :
 
 - Récupérer le code et installer les dépendances
-- Executer les tests unitaires (via Jest)
-- Vérifier les dépendances utilisées (via Depcheck)
-- Vérifier les vulnérabilités des dépendances (audit)
-- Analyser le code avec un linter (ESLint)
-- Build l'application
-- Générer la release de version de manière automatisé avec semantic-release (uniquement pour la mise en production)
+- Executer les tests unitaires **(via Jest)**
+- Vérifier les dépendances utilisées **(via Depcheck)**
+- Vérifier les vulnérabilités des dépendances **(audit)**
+- Analyser le code avec un linter **(ESLint)**
+- **Build** l'application
+- Générer la **release de version** de manière automatisée avec **semantic-release** (uniquement pour la mise en production)
 
 Voici le workflow de la branche main, `.github/workflows/main.yml` :
 
@@ -152,14 +169,16 @@ jobs:
 
 L’application est découpée en deux projets distincts :
 
-- La partie back-end est une API REST basée sur le framework NestJS (Node.js / TypeScript). La persistance des données est assurée par une base de données PostgreSQL qui est connectée à l’API grâce à l’ORM Prisma.
-- La partie front-end est un Bot Discord, c’est un projet Node.js / TypeScript utilisant la librairie discord.js.
+- La partie back-end est une API REST basée sur le framework **NestJS (Node.js / TypeScript)**. La persistance des données est assurée par une base de données **PostgreSQL** qui est connectée à l’API grâce à l’**ORM Prisma.**
+- La partie front-end est un Bot Discord, c’est un projet Node.js / TypeScript utilisant la librairie **discord.js**.
 
-Les projets sont conteneurisés avec Docker pour garantir la reproductibilité et faciliter le déploiement sur différents environnements.
+Les projets sont conteneurisés avec **Docker** pour garantir la reproductibilité et faciliter le déploiement sur les différents environnements.
 
 ### 3.1.1 Schéma de l’architecture logicielle :
 
 ![Schéma de l’architecture logicielle](images/schema.png)
+
+**Note :** Table Maker API est une API externe permettant de générer des tableaux de résultats de matchs Mario Kart, elle a été développée par un développeur de la communauté Mario Kart.
 
 ### 3.1.2 Paradigmes et frameworks :
 
@@ -384,8 +403,10 @@ describe("MatchsService", () => {
 });
 ```
 
-On utilise la librairie Jest pour les tests unitaires
-Ce test teste la création d'un match, on initialise un mock de Prisma (variable `prismaMock`) pour simuler une interaction avec la base de données.
+On utilise la librairie **Jest** pour les tests unitaires
+Cet exemple teste la création d'un match, on initialise un mock de Prisma (variable `prismaMock`) pour simuler une interaction avec la base de données.
+
+Tous les controlleurs et services sont testés, chaque méthode des services possèdent au moins un test pour couvrir tous les cas possibles.
 
 ---
 
@@ -418,12 +439,12 @@ Notre interface est le Bot Discord qui est utilisé sur **l’application Discor
 Pour ces raisons, nous avons choisi de nous baser sur le référentiel **OPQUAST**, bien que celui-ci soit à l’origine pensé pour les sites et applications web, il reste tout à fait applicable pour mesurer la qualité et l’accessibilité d’une interface, y compris dans un contexte un peu particulier comme celui d’un bot Discord.  
 Discord respecte les normes d'accessibilité pour son application, et a mis en place beaucoup de possibilités pour les Bots Discord afin que ceux-ci respectent (dans la mesure du possible) un maximum de ces normes. Les efforts pour ces normes d'accessibilité se sont donc concentrés sur l’interaction avec le Bot Discord ainsi que ses réponses. Voici un tableau présentant les bonnes pratiques Opquast mises en œuvre dans le contexte d’un Bot Discord :
 
-| Règle Opquast                                                                              | Mise en place avec le Bot Discord                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| L’application est utilisable et navigable en utilisant uniquement le clavier. (règle 161)  | Discord est entièrement utilisable avec uniquement le clavier. La norme pour un Bot Discord est désormais d’utiliser les slash commandes, qui permettent d'interagir avec le bot, elles sont compatibles avec le clavier à 100%.                                                                                                                                                                                                                                                                                |
-| L’application offre un ou plusieurs mécanismes pour s’adapter à une vue mobile (règle 189) | Le contenu généré par le bot peut prendre différentes formes : texte, images, embeds, etc. Pour les contenus qui seraient trop larges et donc déformés sur un téléphone, j'ai mis en place un bouton “Vue mobile” pour modifier le contenu. Il n’est malheureusement pas possible de détecter de manière fiable si l’utilisateur est sur mobile ou non, ainsi donner la possibilité à l’utilisateur de modifier directement le contenu via ce bouton est la meilleure solution disponible pour ce genre de cas. |
-| Chaque champ indique le format de données attendu (règle 70)                               | Chaque champ de formulaire indique s’il est requis ou non (règle 69). Les options dans les slash commandes d’un bot agissent comme des champs de formulaire. Il est possible d’indiquer le format attendu ainsi que s’il est requis ou non. Dans notre cas, je précise pour chaque option si elle est requise ou non ainsi que le format demandé directement dans le code de la commande.                                                                                                                       |
-| Chaque image décorative possède un texte alt (règle 111)                                   | Chaque lien d’image possède un texte alt (règle 112). Depuis 2021, Discord permet d’ajouter à une image postée sur Discord une description (qui fait office de alt texte). Il est possible de renseigner cette description avec le Bot Discord lorsque celui-ci utilise une image. Dans notre cas, le bot Discord attache toujours une description pertinente aux images qu’il utilise.                                                                                                                         |
+| Règle Opquast                                                                              | Mise en place avec le Bot Discord                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| L’application est utilisable et navigable en utilisant uniquement le clavier. (règle 161)  | Discord est entièrement utilisable avec uniquement le clavier. La norme pour un Bot Discord est désormais d’utiliser les slash commandes, qui permettent d'interagir avec le bot, elles sont compatibles avec le clavier à 100%.                                                                                                                                                                                                                                                                                                            |
+| L’application offre un ou plusieurs mécanismes pour s’adapter à une vue mobile (règle 189) | Le contenu généré par le bot peut prendre différentes formes : texte, images, embeds, etc. Pour les contenus qui seraient trop larges et donc déformés sur un téléphone, nous avons mis en place un bouton “Vue mobile” pour modifier le contenu. Il n’est malheureusement pas possible de détecter de manière fiable si l’utilisateur est sur mobile ou non, ainsi nous avons estimé que donner la possibilité à l’utilisateur de modifier directement le contenu via ce bouton est la meilleure solution disponible pour ce genre de cas. |
+| Chaque champ indique le format de données attendu (règle 70)                               | Chaque champ de formulaire indique s’il est requis ou non (règle 69). Les options dans les slash commandes d’un bot agissent comme des champs de formulaire. Il est possible d’indiquer le format attendu ainsi que s’il est requis ou non. Dans notre cas, nous précisons pour chaque option si elle est requise ou non ainsi que le format demandé directement dans le code de la commande.                                                                                                                                               |
+| Chaque image décorative possède un texte alt (règle 111)                                   | Chaque lien d’image possède un texte alt (règle 112). Depuis 2021, Discord permet d’ajouter à une image postée sur Discord une description (qui fait office de alt texte). Il est possible de renseigner cette description avec le Bot Discord lorsque celui-ci utilise une image. Dans notre cas, le bot Discord attache toujours une description pertinente aux images qu’il utilise. <br>**Cela est pertinent pour les lecteurs d'écrans**                                                                                               |
 
 **Note :** Une évolution possible de l'application serait une traduction automatique des commandes qui serait adaptée à la langue de l'utilisateur, il est en effet possible de connaître la langue dans laquelle l'utilisateur utilise Discord. Cela permettrait de respecter la règle 80 de Opquast.
 Cela nécessiterait d'investir plus de moyen dans la traduction de l'application dans diverse langue.
@@ -524,9 +545,17 @@ Cette gestion des versions permet de mettre en production la dernières version 
 | LU2   | Mise à jour de la disponibiltié d'un joueur            | Message de disponibilité exitant                                                                                | Interaction avec les boutons du message de disponibilité                       | Met à jour la disponibilité du joueurs (disponible, non-disponible, peut-être disponible)        |
 | MOB1  | Affichage mobile                                       | Message ayant un bouton "Vue mobile"                                                                            | Interaction avec le bouton                                                     | Modifie le message pour avoir un affichage mobile-friendly                                       |
 
-### Tests de fonctionnalités C2.3.1
+### Tests de Sécurités
 
-// todo
+L'API est protégé des attaques par injection SQL grâce à Prisma car on utilise uniquement des requêtes paramétrées ($1, $2, $3…) côté base de données, ce qui empêche un input utilisateur de modifier la structure SQL.<br>
+Cependant par mesure de sécurité, nous pouvons tout de même faire des tests de sécurités.<br>
+Egalement, tous les endpoints critiques sont protégés par une clé d'API, afin de ne pas avoir de modification extérieur par des personnes extérieurs.
+
+| ID  | Scénario                          | Action                                                                                      | Résultat attendu |
+| --- | --------------------------------- | ------------------------------------------------------------------------------------------- | ---------------- |
+| S1  | Requête sans fournir la clé d'API | Requête **POST/PATCH/DELETE** sur n'importe quelle ressource, sans le paramètre `x-api-key` | Erreurs 401      |
+| S2  | Tentative d'injection SQL         | GET `users/' OR 1=1 --`                                                                     | Erreurs 404      |
+| S3  | Tentative d'injection SQL         | GET `users/'; DROP TABLE User; --`                                                          | Erreurs 404      |
 
 ## 4.2 Plan de correction des bogues - C2.3.2
 
@@ -578,7 +607,7 @@ Création de l'issue Github :
 
 Analyse :
 
-Seul un lien sur deux ne fonctionnait pas, j'ai donc recherché la différence qu'il y a eu entre les deux matchs, j'ai remarqué dans les logs que le match concerné par le bug s'est terrminé avec une commande `edit_race` (modification du résultat d'une course, probablement suite à une erreur lors de la commande précédente)
+Seul un lien sur deux ne fonctionnait pas, il a fallit donc rechercher la différence qu'il y a eu entre les deux matchs, On peut remarquer dans les logs que le match concerné par le bug s'est terrminé avec une commande `edit_race` (modification du résultat d'une course, probablement suite à une erreur lors de la commande précédente)
 
 Reproduction de l'action :
 
